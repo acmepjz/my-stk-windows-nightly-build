@@ -1,0 +1,60 @@
+version: 1.0.{build}
+clone_depth: 3
+shallow_clone: false
+skip_commits:
+  message: /.*(\[skip appveyor\]|\[appveyor skip\]).*/
+image:
+  - Visual Studio 2015
+platform:
+  - Win64
+configuration:
+  - Release
+install:
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" set CMAKE_GENERATOR=Visual Studio 12 2013 Win64
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" set CMAKE_GENERATOR=Visual Studio 14 2015 Win64
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" set CMAKE_GENERATOR=Visual Studio 15 2017 Win64
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" set VSVERSION=VS2013
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" set VSVERSION=VS2015
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" set VSVERSION=VS2017
+  # setup Visual Studio
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x64
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  # set branch
+  - set THE_BRANCH=network
+  # clone stk
+  - cd .. && mkdir stk && cd stk
+  - git clone --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
+  - svn co "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
+  - cd stk-assets && del /F /S /Q .svn && cd ..
+  - git clone --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
+  - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
+  # over
+  - set BINSUFFIX=%THE_BRANCH%-%PLATFORM%-%VSVERSION%-%CONFIGURATION%
+artifacts:
+  - path: 'binonly-$(BINSUFFIX).7z'
+  - path: 'bin+data-$(BINSUFFIX).7z'
+before_build:
+  # generate makefile
+  - mkdir build && cd build
+  - cmake -G "%CMAKE_GENERATOR%" ..\..\stk\stk-code
+build:
+  project: build\SuperTuxKart.sln
+  verbosity: normal
+after_build:
+  - cd /d %APPVEYOR_BUILD_FOLDER%
+  # move file to correct location
+  - move build\bin\%CONFIGURATION% bin
+  # now we try to package the binary
+  - echo bin\ > lst.txt
+  - echo CHANGELOG.md >> lst.txt
+  - echo COPYING >> lst.txt
+  - echo NETWORKING.md >> lst.txt
+  - echo README.md >> lst.txt
+  - 7z a -t7z -mx=9 "binonly-%BINSUFFIX%.7z" @lst.txt
+  # this is with data
+  - echo data\ >> lst.txt
+  - echo doc\ >> lst.txt
+  - del /F /S /Q tools\windows_installer
+  - echo tools\ >> lst.txt
+  - 7z a -t7z -mx=9 "bin+data-%BINSUFFIX%.7z" @lst.txt
