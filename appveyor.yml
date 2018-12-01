@@ -24,10 +24,10 @@ install:
   - set THE_BRANCH=network
   # clone stk
   - cd .. && mkdir stk && cd stk
-  - git clone --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
-  - svn co "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
+  - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
+  - svn co --quiet "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
   - cd stk-assets && del /F /S /Q .svn && cd ..
-  - git clone --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
+  - git clone --quiet --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
   - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
   # over
   - set BINSUFFIX=%THE_BRANCH%-%PLATFORM%-%VSVERSION%-%CONFIGURATION%
@@ -36,6 +36,7 @@ artifacts:
   - path: 'bin+data-$(BINSUFFIX).7z'
 before_build:
   # generate makefile
+  - cd /d %APPVEYOR_BUILD_FOLDER%
   - mkdir build && cd build
   - cmake -G "%CMAKE_GENERATOR%" ..\..\stk\stk-code
 build:
