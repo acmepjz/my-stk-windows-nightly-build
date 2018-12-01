@@ -56,7 +56,7 @@ after_build:
   - 7z a -t7z -mx=9 "binonly-%BINSUFFIX%.7z" @lst.txt
   # this is with data
   - move ..\stk\stk-assets data
-  - copy /y ..\stk\stk-code\data data
+  - xcopy /y /e /c ..\stk\stk-code\data data
   - move ..\stk\stk-code\doc doc
   - move ..\stk\stk-code\tools tools
   - del /F /S /Q tools\windows_installer > NUL
