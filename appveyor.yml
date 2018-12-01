@@ -26,7 +26,7 @@ install:
   - cd .. && mkdir stk && cd stk
   - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
   - svn co --quiet "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
-  - cd stk-assets && del /F /S /Q .svn > NUL && cd ..
+  - cd stk-assets && del /F /S /Q .svn > NUL && rmdir /S /Q .svn > NUL && cd ..
   - git clone --quiet --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
   - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
   # over
@@ -59,7 +59,7 @@ after_build:
   - xcopy /y /e /c ..\stk\stk-code\data data
   - move ..\stk\stk-code\doc doc
   - move ..\stk\stk-code\tools tools
-  - del /F /S /Q tools\windows_installer > NUL
+  - del /F /S /Q tools\windows_installer > NUL && rmdir /S /Q tools\windows_installer > NUL
   - echo data\ >> lst.txt
   - echo doc\ >> lst.txt
   - echo tools\ >> lst.txt
