@@ -6,7 +6,7 @@ skip_commits:
 image:
   - Visual Studio 2015
 platform:
-  - Win64
+  - x64
 configuration:
   - Release
 install:
@@ -26,7 +26,7 @@ install:
   - cd .. && mkdir stk && cd stk
   - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
   - svn co --quiet "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
-  - cd stk-assets && del /F /S /Q .svn && cd ..
+  - cd stk-assets && del /F /S /Q .svn > NUL && cd ..
   - git clone --quiet --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
   - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
   # over
@@ -38,7 +38,7 @@ before_build:
   # generate makefile
   - cd /d %APPVEYOR_BUILD_FOLDER%
   - mkdir build && cd build
-  - cmake -G "%CMAKE_GENERATOR%" ..\..\stk\stk-code
+  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE="%CONFIGURATION%" ..\..\stk\stk-code
 build:
   project: build\SuperTuxKart.sln
   verbosity: normal
@@ -56,6 +56,6 @@ after_build:
   # this is with data
   - echo data\ >> lst.txt
   - echo doc\ >> lst.txt
-  - del /F /S /Q tools\windows_installer
+  - del /F /S /Q tools\windows_installer > NUL
   - echo tools\ >> lst.txt
   - 7z a -t7z -mx=9 "bin+data-%BINSUFFIX%.7z" @lst.txt
