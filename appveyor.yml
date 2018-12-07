@@ -63,7 +63,7 @@ build:
 after_build:
   - cd /d %APPVEYOR_BUILD_FOLDER%
   # move file to correct location
-  - mkdir stk-code
+  - mkdir stk-code\build\bin
   - move build\bin\%CONFIGURATION% stk-code\build\bin\%CONFIGURATION%
   - del README.md && copy ..\stk\stk-code\*.md .\ && copy ..\stk\stk-code\COPYING .\
   # now we try to package the binary
