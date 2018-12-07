@@ -24,10 +24,28 @@ install:
   - set THE_BRANCH=network
   # clone stk
   - cd .. && mkdir stk && cd stk
+  - echo --- The branch is > %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo %THE_BRANCH% >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
+  - cd stk-code
+  - echo --- The version of stk-code is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - git rev-parse --short HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - cd ..
   - svn co --quiet "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
-  - cd stk-assets && del /F /S /Q .svn > NUL && rmdir /S /Q .svn > NUL && cd ..
+  - cd stk-assets
+  - echo --- The version of stk-assets is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - svn info >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - del /F /S /Q .svn > NUL && rmdir /S /Q .svn > NUL
+  - cd ..
   - git clone --quiet --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
+  - cd dependencies
+  - echo --- The version of dependencies is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - git rev-parse --short HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - cd ..
   - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
   # over
   - set BINSUFFIX=%THE_BRANCH%-%PLATFORM%-%VSVERSION%-%CONFIGURATION%
@@ -45,22 +63,36 @@ build:
 after_build:
   - cd /d %APPVEYOR_BUILD_FOLDER%
   # move file to correct location
-  - move build\bin\%CONFIGURATION% bin
+  - mkdir stk-code
+  - move build\bin\%CONFIGURATION% stk-code\build\bin\%CONFIGURATION%
   - del README.md && copy ..\stk\stk-code\*.md .\ && copy ..\stk\stk-code\COPYING .\
   # now we try to package the binary
-  - echo bin\ > lst.txt
+  - echo stk-code\ > lst.txt
   - echo CHANGELOG.md >> lst.txt
   - echo COPYING >> lst.txt
   - echo NETWORKING.md >> lst.txt
   - echo README.md >> lst.txt
+  - echo nightly_build_version.txt >> lst.txt
   - 7z a -t7z -mx=9 "binonly-%BINSUFFIX%.7z" @lst.txt
   # this is with data
-  - move ..\stk\stk-assets data
-  - xcopy /y /e /c ..\stk\stk-code\data data
+  - move ..\stk\stk-assets stk-assets
+  - move ..\stk\stk-code\data stk-code\data
   - move ..\stk\stk-code\doc doc
   - move ..\stk\stk-code\tools tools
   - del /F /S /Q tools\windows_installer > NUL && rmdir /S /Q tools\windows_installer > NUL
-  - echo data\ >> lst.txt
+  - echo stk-assets\ >> lst.txt
   - echo doc\ >> lst.txt
   - echo tools\ >> lst.txt
   - 7z a -t7z -mx=9 "bin+data-%BINSUFFIX%.7z" @lst.txt
+deploy:
+  - provider: BinTray
+    username: acmepjz
+    api_key:
+      secure: 5v4Sk+26IeEJHHhwoVW+lXi133R8OVB4kSqcmgOUUf2G1xEDEm1t7dlhe6N/I/AD
+    subject: acmepjz
+    repo: my-stk-windows-nightly-build
+    package: stk
+    version: nightly
+    publish: true
+    override: true
+    explode: false
