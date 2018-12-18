@@ -30,7 +30,7 @@ install:
   - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
   - cd stk-code
   - echo --- The version of stk-code is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - git rev-parse --short HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - git show -s HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - cd ..
   - svn co --quiet "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
@@ -43,10 +43,14 @@ install:
   - git clone --quiet --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
   - cd dependencies
   - echo --- The version of dependencies is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - git rev-parse --short HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - git show -s HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - cd ..
   - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
+  #
+  - cd /d %APPVEYOR_BUILD_FOLDER%
+  - d2u nightly_build_version.txt
+  - u2d nightly_build_version.txt
   # over
   - set BINSUFFIX=%THE_BRANCH%-%PLATFORM%-%VSVERSION%-%CONFIGURATION%
 artifacts:
