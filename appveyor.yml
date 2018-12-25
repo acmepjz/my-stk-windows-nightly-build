@@ -21,7 +21,7 @@ install:
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   # set branch
-  - set THE_BRANCH=network
+  - set THE_BRANCH=master
   # clone stk
   - cd .. && mkdir stk && cd stk
   - echo --- The branch is > %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
