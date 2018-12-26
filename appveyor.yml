@@ -24,7 +24,10 @@ install:
   - set THE_BRANCH=master
   # clone stk
   - cd .. && mkdir stk && cd stk
-  - echo --- The branch is > %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo --- The build date is > %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - date /t >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - echo --- The branch is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - echo %THE_BRANCH% >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
   - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
