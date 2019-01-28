@@ -72,7 +72,7 @@ after_build:
   # move file to correct location
   - mkdir stk-code\build\bin
   - move build\bin\%CONFIGURATION% stk-code\build\bin\%CONFIGURATION%
-  - del /y stk-code\build\bin\%CONFIGURATION%\*.ilk
+  - del /q stk-code\build\bin\%CONFIGURATION%\*.ilk
   - del README.md && copy ..\stk\stk-code\*.md .\ && copy ..\stk\stk-code\COPYING .\
   # now we try to package the binary
   - echo stk-code\ > lst.txt
