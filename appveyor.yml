@@ -57,8 +57,9 @@ install:
   # over
   - set BINSUFFIX=%THE_BRANCH%-%PLATFORM%-%VSVERSION%-%CONFIGURATION%
 artifacts:
-  - path: 'binonly-$(BINSUFFIX).7z'
+  - path: 'assets-$(BINSUFFIX).7z'
   - path: 'bin+data-$(BINSUFFIX).7z'
+  - path: 'nightly_build_version.txt'
 before_build:
   # generate makefile
   - cd /d %APPVEYOR_BUILD_FOLDER%
@@ -81,17 +82,19 @@ after_build:
   - echo NETWORKING.md >> lst.txt
   - echo README.md >> lst.txt
   - echo nightly_build_version.txt >> lst.txt
-  - 7z a -t7z -mx=9 "binonly-%BINSUFFIX%.7z" @lst.txt
-  # this is with data
-  - move ..\stk\stk-assets stk-assets
+  # and data
   - move ..\stk\stk-code\data stk-code\data
   - move ..\stk\stk-code\doc doc
   - move ..\stk\stk-code\tools tools
   - del /F /S /Q tools\windows_installer > NUL && rmdir /S /Q tools\windows_installer > NUL
-  - echo stk-assets\ >> lst.txt
   - echo doc\ >> lst.txt
   - echo tools\ >> lst.txt
   - 7z a -t7z -mx=9 "bin+data-%BINSUFFIX%.7z" @lst.txt
+  # this is assets
+  - move ..\stk\stk-assets stk-assets
+  - echo nightly_build_version.txt > lst.txt
+  - echo stk-assets\ >> lst.txt
+  - 7z a -t7z -mx=9 "assets-%BINSUFFIX%.7z" @lst.txt
 # deploy:
 #  - provider: BinTray
 #    username: acmepjz
