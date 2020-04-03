@@ -31,8 +31,8 @@ install:
   - del conf.py
   - ren conf_new.py conf.py
   # install dependencies
-  - pip3 install sphinx
-  - pip3 install sphinx_rtd_theme
+  - pip install sphinx
+  - pip install sphinx_rtd_theme
 artifacts:
   - path: 'GodotEnginedoc.chm'
 before_build:
