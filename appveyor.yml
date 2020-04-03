@@ -34,8 +34,8 @@ install:
   - pip install sphinx
   - pip install sphinx_rtd_theme
 artifacts:
-  - path: 'GodotEnginedoc.chm'
-before_build:
+  - path: 'GodotEnginedoc.7z'
+build_script:
   # build
   - cd /d %APPVEYOR_BUILD_FOLDER%
   - cd ..\godot-docs
@@ -44,7 +44,6 @@ before_build:
   - cd _build
   - >
     "C:\Program Files (x86)\HTML Help Workshop\hhc.exe" GodotEnginedoc.hhp
-build: true
 after_build:
   - cd /d %APPVEYOR_BUILD_FOLDER%
   # move file to correct location
