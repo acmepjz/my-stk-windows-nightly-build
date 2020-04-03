@@ -21,89 +21,31 @@ install:
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   # set branch
-  - set THE_BRANCH=master
-  # clone stk
-  - cd .. && mkdir stk && cd stk
-  - echo --- The build date is > %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - date /t >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo --- The branch is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo %THE_BRANCH% >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/supertuxkart/stk-code" stk-code
-  - cd stk-code
-  - echo --- The version of stk-code is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - git show -s HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
+  - set THE_BRANCH=stable
+  # clone godot-docs
   - cd ..
-  - svn co --quiet "https://svn.code.sf.net/p/supertuxkart/code/stk-assets" stk-assets
-  - cd stk-assets
-  - echo --- The version of stk-assets is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - svn info >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - del /F /S /Q .svn > NUL && rmdir /S /Q .svn > NUL
-  - cd ..
-  - git clone --quiet --depth 1 "https://github.com/supertuxkart/dependencies.git" dependencies
-  - cd dependencies
-  - echo --- The version of dependencies is >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - git show -s HEAD >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - echo. >> %APPVEYOR_BUILD_FOLDER%\nightly_build_version.txt
-  - cd ..
-  - move dependencies\windows_64bit\dependencies stk-code\dependencies-64bit
-  #
-  - cd /d %APPVEYOR_BUILD_FOLDER%
-  - d2u nightly_build_version.txt
-  - u2d nightly_build_version.txt
-  # over
-  - set BINSUFFIX=%THE_BRANCH%-%PLATFORM%-%VSVERSION%-%CONFIGURATION%
+  - git clone --quiet --depth 1 --branch %THE_BRANCH% "https://github.com/godotengine/godot-docs.git"
+  - cd godot-docs
+  # do some modifications to conf.py
+  - copy conf.py /b + ..\my-stk-windows-nightly-build\patch.py /b conf_new.py /b
+  - del conf.py
+  - ren conf_new.py conf.py
+  # install dependencies
+  - pip install -r requirements.txt
 artifacts:
-  - path: 'assets-$(BINSUFFIX).7z'
-  - path: 'bin+data-$(BINSUFFIX).7z'
-  - path: 'nightly_build_version.txt'
+  - path: 'GodotEnginedoc.chm'
 before_build:
-  # generate makefile
+  # build
   - cd /d %APPVEYOR_BUILD_FOLDER%
-  - mkdir build && cd build
-  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE="%CONFIGURATION%" ..\..\stk\stk-code
-build:
-  project: build\SuperTuxKart.sln
-  verbosity: normal
+  - cd ..\godot-docs
+  - sphinx-build -b htmlhelp ./ _build
+  # build htmlhelp
+  - cd _build
+  - "C:\Program Files (x86)\HTML Help Workshop\hhc.exe" GodotEnginedoc.hhp
+build: true
 after_build:
   - cd /d %APPVEYOR_BUILD_FOLDER%
   # move file to correct location
-  - mkdir stk-code\build\bin
-  - move build\bin\%CONFIGURATION% stk-code\build\bin\%CONFIGURATION%
-  - del /q stk-code\build\bin\%CONFIGURATION%\*.ilk
-  - del README.md && copy ..\stk\stk-code\*.md .\ && copy ..\stk\stk-code\COPYING .\
-  # now we try to package the binary
-  - echo stk-code\ > lst.txt
-  - echo CHANGELOG.md >> lst.txt
-  - echo COPYING >> lst.txt
-  - echo NETWORKING.md >> lst.txt
-  - echo README.md >> lst.txt
-  - echo nightly_build_version.txt >> lst.txt
-  # and data
-  - move ..\stk\stk-code\data stk-code\data
-  - move ..\stk\stk-code\doc doc
-  - move ..\stk\stk-code\tools tools
-  - del /F /S /Q tools\windows_installer > NUL && rmdir /S /Q tools\windows_installer > NUL
-  - echo doc\ >> lst.txt
-  - echo tools\ >> lst.txt
-  - 7z a -t7z -mx=9 "bin+data-%BINSUFFIX%.7z" @lst.txt
-  # this is assets
-  - move ..\stk\stk-assets stk-assets
-  - echo nightly_build_version.txt > lst.txt
-  - echo stk-assets\ >> lst.txt
-  - 7z a -t7z -mx=9 "assets-%BINSUFFIX%.7z" @lst.txt
-# deploy:
-#  - provider: BinTray
-#    username: acmepjz
-#    api_key:
-#      secure: 5v4Sk+26IeEJHHhwoVW+lXi133R8OVB4kSqcmgOUUf2G1xEDEm1t7dlhe6N/I/AD
-#    subject: acmepjz
-#    repo: my-stk-windows-nightly-build
-#    package: stk
-#    version: nightly
-#    publish: true
-#    override: true
-#    explode: false
+  - move ..\godot-docs\_build\GodotEnginedoc.chm .\
+  # package
+  - 7z a -t7z -mx=9 GodotEnginedoc.7z GodotEnginedoc.chm
