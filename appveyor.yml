@@ -41,7 +41,8 @@ before_build:
   - sphinx-build -b htmlhelp ./ _build
   # build htmlhelp
   - cd _build
-  - "C:\Program Files (x86)\HTML Help Workshop\hhc.exe" GodotEnginedoc.hhp
+  - >
+    "C:\Program Files (x86)\HTML Help Workshop\hhc.exe" GodotEnginedoc.hhp
 build: true
 after_build:
   - cd /d %APPVEYOR_BUILD_FOLDER%
