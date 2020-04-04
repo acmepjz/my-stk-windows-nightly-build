@@ -40,8 +40,9 @@ build_script:
   - cd /d %APPVEYOR_BUILD_FOLDER%
   - cd ..\godot-docs
   - sphinx-build -b htmlhelp ./ _build
-  # build htmlhelp
+  # convert the encodings under Windows & build htmlhelp
   - cd _build
+  - python ..\..\my-stk-windows-nightly-build\convert_encoding.py
   - >
     "C:\Program Files (x86)\HTML Help Workshop\hhc.exe" GodotEnginedoc.hhp
 after_build:
