@@ -37,6 +37,7 @@ install:
   # install dependencies
   - python -m pip install sphinx
   - python -m pip install sphinx_rtd_theme
+  - python -m pip install sphinx-tabs
 artifacts:
   - path: 'GodotEnginedoc.7z'
 build_script:
