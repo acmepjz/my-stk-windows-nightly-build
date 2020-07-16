@@ -34,18 +34,18 @@ install:
   - del conf.py
   - ren conf_new.py conf.py
   # install dependencies
-  - %PYTHON%\python.exe -m pip install sphinx
-  - %PYTHON%\python.exe -m pip install sphinx_rtd_theme
+  - "%PYTHON%\python.exe" -m pip install sphinx
+  - "%PYTHON%\python.exe" -m pip install sphinx_rtd_theme
 artifacts:
   - path: 'GodotEnginedoc.7z'
 build_script:
   # build
   - cd /d %APPVEYOR_BUILD_FOLDER%
   - cd ..\godot-docs
-  - %PYTHON%\python.exe -m sphinx -b htmlhelp ./ _build
+  - "%PYTHON%\python.exe" -m sphinx -b htmlhelp ./ _build
   # convert the encodings under Windows & build htmlhelp
   - cd _build
-  - %PYTHON%\python.exe ..\..\my-stk-windows-nightly-build\convert_encoding.py
+  - "%PYTHON%\python.exe" ..\..\my-stk-windows-nightly-build\convert_encoding.py
   - >
     "C:\Program Files (x86)\HTML Help Workshop\hhc.exe" GodotEnginedoc.hhp
 after_build:
